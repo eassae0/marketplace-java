@@ -1,37 +1,19 @@
-import java.sql.*;
-import java.util.ArrayList;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
 import java.util.List;
 
 public class ProductRepository {
-    private final String url = "jdbc:postgresql://localhost:5433/postgres";
-    private final String user = "postgres";
-    private final String password = "root";
-
 
     List<Product> findAllProducts() {
-        List<Product> products = new ArrayList<>();
-        String sqlQuery = "SELECT * FROM products";
+        List<Product> products = null;
 
-        try (Connection connection = DriverManager.getConnection(url, user, password);
-             Statement statement = connection.createStatement()) {
-
-            try (ResultSet resultSet = statement.executeQuery(sqlQuery)) {
-                while (resultSet.next()) {
-                    int id = resultSet.getInt("id");
-                    String title = resultSet.getString("title");
-                    double price = resultSet.getDouble("price");
-                    int quantity = resultSet.getInt("quantity");
-                    int category_id = resultSet.getInt("category_id");
-
-                    Product product = new Product(id, title, price, quantity, category_id);
-
-                    products.add(product);
-                }
-            }
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            products = session.createQuery("FROM Product", Product.class).getResultList();
         } catch (Exception e) {
-            System.out.println("\nError occurred while executing findAll in ProductRepository: ");
             e.printStackTrace();
         }
+
         return products;
     }
 
@@ -42,160 +24,124 @@ public class ProductRepository {
     }
 
     public void saveCategory(String name) {
-        String checkQuery = "SELECT COUNT(*) FROM categories WHERE name = ?";
-        String insertQuery = "INSERT INTO categories (name) VALUES (?)";
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
 
-        try(Connection connection = DriverManager.getConnection(url, user, password)) {
+            Category existingCategory = session.createQuery("FROM Category WHERE name = :nameParam", Category.class)
+                    .setParameter("nameParam", name)
+                    .uniqueResult();
 
-            try(PreparedStatement checkStmt = connection.prepareStatement(checkQuery)) {
-                checkStmt.setString(1, name);
-                try(ResultSet resultSet = checkStmt.executeQuery()) {
-                    if (resultSet.next() && resultSet.getInt(1) > 0) {
-                        System.out.println("\nCategory " + name + " already exists!\n");
-                        return;
-                    }
-                }
+            if (existingCategory != null) {
+                System.out.println("Category " + name + "already existed!");
+            } else {
+                session.persist(new Category(0, name));
+                System.out.println("Category " + name + " successfully saved!");
             }
-
-            try(PreparedStatement insertStmt = connection.prepareStatement(insertQuery)) {
-                insertStmt.setString(1, name);
-                insertStmt.executeUpdate();
-                System.out.println("\nCategory successfully saved to database!\n");
-            }
+            transaction.commit();
         } catch (Exception e) {
-            System.out.println("\nError occurred while executing saveCategories in ProductRepository: ");
+            if (transaction != null && transaction.isActive()) transaction.rollback();
             e.printStackTrace();
         }
     }
 
-    public void saveProduct(Product product) {
-        String checkQuery = "SELECT COUNT(*) FROM products WHERE title = ?";
-        String insertQuery = "INSERT INTO products (title, price, quantity, category_id) VALUES (?, ?, ?, ?)";
-        String updateQuery = "UPDATE products SET quantity = quantity + ? WHERE title = ?";
-
-        try (Connection connection = DriverManager.getConnection(url, user, password)) {
-
-            boolean productExist = false;
-
-            try (PreparedStatement checkStatement = connection.prepareStatement(checkQuery)) {
-                checkStatement.setString(1, product.getTitle());
-                try (ResultSet checkResultSet = checkStatement.executeQuery()) {
-                    if (checkResultSet.next() && checkResultSet.getInt(1) > 0) {
-                        productExist = true;
-                    }
-                }
-            }
-
-            if (productExist) {
-                try (PreparedStatement updateStmt = connection.prepareStatement(updateQuery)) {
-                    updateStmt.setInt(1, product.getQuantity());
-                    updateStmt.setString(2, product.getTitle());
-
-                    updateStmt.executeUpdate();
-                    System.out.println("\nProduct '" + product.getTitle() + "' already exists. Quantity updated!\n");
-                }
-            } else {
-                try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-                    preparedStatement.setString(1, product.getTitle());
-                    preparedStatement.setDouble(2, product.getPrice());
-                    preparedStatement.setInt(3, product.getQuantity());
-                    preparedStatement.setInt(4, product.getCategoryId());
-
-                    preparedStatement.executeUpdate();
-                    System.out.println("\nProduct successfully saved to database!\n");
-                }
-            }
-
+    public Product findByTitle(String title) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("FROM Product WHERE title = :titleParam", Product.class)
+                    .setParameter("titleParam", title)
+                    .uniqueResult();
         } catch (Exception e) {
-            System.out.println("\nError occurred while executing saveProduct in ProductRepository: ");
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void saveProduct(Product newProduct) {
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+
+            Product existingProduct = session.createQuery("FROM Product WHERE title = :titleParam", Product.class)
+                    .setParameter("titleParam", newProduct.getTitle())
+                    .uniqueResult();
+
+            if (existingProduct != null) {
+                existingProduct.setQuantity(existingProduct.getQuantity() + newProduct.getQuantity());
+                existingProduct.setPrice(newProduct.getPrice());
+            } else {
+                session.persist(newProduct);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) transaction.rollback();
             e.printStackTrace();
         }
     }
 
     public void deleteCategory(int id) {
-        String deleteQuery = "DELETE FROM categories WHERE id = ?";
+        Transaction transaction = null;
 
-        try (Connection connection = DriverManager.getConnection(url, user, password);
-             PreparedStatement preparedStmt = connection.prepareStatement(deleteQuery)) {
-
-            preparedStmt.setInt(1, id);
-
-            int rowsDeleted = preparedStmt.executeUpdate();
-
-            if (rowsDeleted > 0) {
-                System.out.println("Category with ID: " + id + " was successfully deleted.");
-            } else {
-                System.out.println("Category with ID: " + id + " not found. Nothing was deleted.");
-            }
-
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            Category category = session.get(Category.class, id);
+            session.remove(category);
+            transaction.commit();
         } catch (Exception e) {
-            System.out.println("\nError occurred while executing deleteCategory in ProductRepository: ");
+            if (transaction != null && transaction.isActive()) transaction.rollback();
             e.printStackTrace();
         }
     }
 
     public void deleteCategory(String name) {
-        String deleteQuery = "DELETE FROM categories WHERE name = ?";
-
-        try (Connection connection = DriverManager.getConnection(url, user, password);
-             PreparedStatement preparedStmt = connection.prepareStatement(deleteQuery)) {
-
-            preparedStmt.setString(1, name);
-
-            int rowsDeleted = preparedStmt.executeUpdate();
-
-            if (rowsDeleted > 0) {
-                System.out.println("Category with name: " + name + " was successfully deleted.");
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            Category category = session.createQuery("FROM Category WHERE name = :nameParam", Category.class)
+                    .setParameter("nameParam", name)
+                    .uniqueResult();
+            if (category != null) {
+                session.remove(category);
+                System.out.println("Category " + name + " successfully deleted.");
             } else {
-                System.out.println("Category with name: " + name + " not found. Nothing was deleted.");
+                System.out.println("Category " + name + " not found.");
             }
-
+            transaction.commit();
         } catch (Exception e) {
-            System.out.println("\nError occurred while executing deleteCategory in ProductRepository: ");
+            if (transaction != null && transaction.isActive()) transaction.rollback();
             e.printStackTrace();
         }
     }
 
     public void deleteProduct(int id) {
-        String deleteQuery = "DELETE FROM products WHERE id = ?";
+        Transaction transaction = null;
 
-        try (Connection connection = DriverManager.getConnection(url, user, password);
-             PreparedStatement preparedStmt = connection.prepareStatement(deleteQuery)) {
-
-            preparedStmt.setInt(1, id);
-
-            int rowsDeleted = preparedStmt.executeUpdate();
-
-            if (rowsDeleted > 0) {
-                System.out.println("Product with ID: " + id + " was successfully deleted.");
-            } else {
-                System.out.println("Product with ID: " + id + " not found. Nothing was deleted.");
-            }
-
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            Product product = session.get(Product.class, id);
+            session.remove(product);
+            transaction.commit();
         } catch (Exception e) {
-            System.out.println("\nError occurred while executing deleteProduct in ProductRepository: ");
+            if (transaction != null && transaction.isActive()) transaction.rollback();
             e.printStackTrace();
         }
     }
 
     public void deleteProduct(String title) {
-        String deleteQuery = "DELETE FROM products WHERE title = ?";
-
-        try (Connection connection = DriverManager.getConnection(url, user, password);
-             PreparedStatement preparedStmt = connection.prepareStatement(deleteQuery)) {
-
-            preparedStmt.setString(1, title);
-
-            int rowsDeleted = preparedStmt.executeUpdate();
-
-            if (rowsDeleted > 0) {
-                System.out.println("Product with title: " + title + " was successfully deleted.");
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            Product product = session.createQuery("FROM Product WHERE title = :titleParam", Product.class)
+                    .setParameter("titleParam", title)
+                    .uniqueResult();
+            if (product != null) {
+                session.remove(product);
+                System.out.println("Product " + title + " successfully deleted.");
             } else {
-                System.out.println("Product with title: " + title + " not found. Nothing was deleted.");
+                System.out.println("Product " + title + " not found.");
             }
-
+            transaction.commit();
         } catch (Exception e) {
-            System.out.println("\nError occurred while executing deleteProduct in ProductRepository: ");
+            if (transaction != null && transaction.isActive()) transaction.rollback();
             e.printStackTrace();
         }
     }
