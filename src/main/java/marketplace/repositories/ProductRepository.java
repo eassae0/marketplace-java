@@ -1,7 +1,7 @@
-package repositories;
+package marketplace.repositories;
 
-import entity.Category;
-import entity.Product;
+import marketplace.entity.Category;
+import marketplace.entity.Product;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

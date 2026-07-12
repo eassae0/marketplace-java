@@ -1,4 +1,4 @@
-package entity;
+package marketplace.entity;
 
 import jakarta.persistence.*;
 
