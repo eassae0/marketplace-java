@@ -1,4 +1,9 @@
+package entity;
+
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "categories")
@@ -8,12 +13,15 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int id;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false, unique = true)
     String name;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Product> products = new ArrayList<>();
 
     public Category() {}
 
-    Category(int id, String name) {
+    public Category(int id, String name) {
         this.id = id;
         this.name = name;
     }

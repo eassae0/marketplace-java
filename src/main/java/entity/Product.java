@@ -1,3 +1,5 @@
+package entity;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -17,18 +19,19 @@ public class Product {
     @Column(name = "quantity")
     private int quantity;
 
-    @Column(name = "category_id")
-    private int categoryId;
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
     public Product() {
     }
 
-    public Product(int id, String title, double price, int quantity, int categoryId) {
+    public Product(int id, String title, double price, int quantity, Category category) {
         this.id = id;
         this.title = title;
         this.price = price;
         this.quantity = quantity;
-        this.categoryId = categoryId;
+        this.category = category;
     }
 
     public int getId() { return id; }
@@ -43,12 +46,12 @@ public class Product {
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
 
-    public int getCategoryId() { return categoryId; }
-    public void setCategoryId(int categoryId) { this.categoryId = categoryId; }
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
 
     @Override
     public String toString() {
-        return String.format("ID: %d | %s | Цена: %.2f руб. | Количество: %d шт. | Категория: %d",
-                id, title, price, quantity, categoryId);
+        return String.format("ID: %d | %s | Цена: %.2f руб. | Количество: %d шт. | Категория: %s",
+                id, title, price, quantity, category.getName());
     }
 }

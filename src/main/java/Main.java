@@ -1,7 +1,16 @@
+import config.AppConfig;
+import entity.Category;
+import entity.Product;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import repositories.ProductRepository;
+
 public class Main {
     public static void main(String[] args) {
-    ProductRepository productRepository = new ProductRepository();
+        AnnotationConfigApplicationContext context =
+                new AnnotationConfigApplicationContext(AppConfig.class);
 
-    productRepository.saveProduct(new Product(0, "Apple Airpods Pro 3", 16999.99, 30, 1));
+        ProductRepository productRepository = context.getBean(ProductRepository.class);
+
+
     }
 }
