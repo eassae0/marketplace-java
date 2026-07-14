@@ -19,10 +19,10 @@ public class OrderController {
     private  final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity createOrder(@RequestBody Map<Integer, Integer> cart) {
+    public ResponseEntity createOrder(@RequestBody Map<Long, Long> cart) {
 
         User tempUser = new User();
-        tempUser.setId(1);
+        tempUser.setId(1L);
 
         Order order = orderService.createOrder(tempUser, cart);
         return ResponseEntity.ok(order);

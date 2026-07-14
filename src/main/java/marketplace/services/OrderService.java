@@ -23,7 +23,7 @@ public class OrderService {
     private final OrderProductRepository orderProductRepository;
 
     @Transactional
-    public Order createOrder(User user, Map<Integer, Integer> cart) {
+    public Order createOrder(User user, Map<Long, Long> cart) {
         Order order = new Order();
         order.setUser(user);
         order.setCreatedAt(LocalDateTime.now());
@@ -32,9 +32,9 @@ public class OrderService {
 
         orderRepository.save(order);
 
-        for (Map.Entry<Integer, Integer> entry : cart.entrySet()) {
-            int productId = entry.getKey();
-            int productQuantity = entry.getValue();
+        for (Map.Entry<Long, Long> entry : cart.entrySet()) {
+            Long productId = entry.getKey();
+            Long productQuantity = entry.getValue();
             Product product = productRepository.findByIdForUpdate(productId)
                     .orElseThrow(() -> new RuntimeException("Product with ID: " + productId + " not found!"));
 
@@ -48,7 +48,7 @@ public class OrderService {
 
             product.setQuantity(product.getQuantity() - productQuantity);
 
-            OrderProduct orderProduct = new OrderProduct(0, purchasePrice, order, product, productQuantity);
+            OrderProduct orderProduct = new OrderProduct(0L, purchasePrice, order, product, productQuantity);
             order.getItems().add(orderProduct);
             orderProductRepository.save(orderProduct);
         }

@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class OrderProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal purchasePrice;
@@ -27,6 +27,6 @@ public class OrderProduct {
     @JoinColumn(name = "product_id")
     Product product;
 
-    private int quantity;
+    private Long quantity;
 
 }
