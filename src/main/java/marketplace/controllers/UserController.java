@@ -1,5 +1,6 @@
 package marketplace.controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import marketplace.dto.request.UserCreateRequest;
 import marketplace.dto.request.UserUpdateRequest;
@@ -21,7 +22,7 @@ public class UserController {
 
 
     @PostMapping
-    public ResponseEntity<UserResponse> create(@RequestBody UserCreateRequest request) {
+    public ResponseEntity<UserResponse> create(@Valid @RequestBody UserCreateRequest request) {
         User user = UserMapper.toEntity(request);
         User savedUser = userService.register(user);
 
@@ -53,7 +54,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> update(@PathVariable Long id,
-                                       @RequestBody UserUpdateRequest request) {
+                                       @Valid @RequestBody UserUpdateRequest request) {
         User user = userService.update(id, request);
         return ResponseEntity.ok(UserMapper.toResponse(user));
     }

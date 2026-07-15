@@ -27,7 +27,7 @@ public class Product {
     @Column(name = "quantity")
     private Long quantity;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
