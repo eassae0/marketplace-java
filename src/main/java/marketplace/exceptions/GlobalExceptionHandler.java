@@ -1,7 +1,6 @@
 package marketplace.exceptions;
 
 import marketplace.dto.response.ErrorResponse;
-import marketplace.entity.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -17,12 +16,12 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserAlreadyExistedException.class)
-    public ResponseEntity<ErrorResponse> handleUserAlreadyExist(UserAlreadyExistedException e) {
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUserAlreadyExist(UserAlreadyExistsException e) {
 
         ErrorResponse response = new ErrorResponse(
                 LocalDateTime.now(),
-                HttpStatus.CONTINUE.value(),
+                HttpStatus.CONFLICT.value(),
                 e.getMessage(),
                 null
         );
@@ -61,4 +60,31 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCategoryNotFound(CategoryNotFoundException e) {
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                e.getMessage(),
+                null
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(CategoryAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleCategoryAlreadyExist(CategoryAlreadyExistsException e) {
+
+        ErrorResponse response = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                e.getMessage(),
+                null
+        );
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(response);
+    }
+
+
 }

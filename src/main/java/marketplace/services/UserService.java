@@ -4,13 +4,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import marketplace.dto.request.UserUpdateRequest;
 import marketplace.entity.User;
-import marketplace.exceptions.UserAlreadyExistedException;
+import marketplace.exceptions.UserAlreadyExistsException;
 import marketplace.exceptions.UserNotFoundException;
 import marketplace.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +19,7 @@ public class UserService {
     @Transactional
     public User register(User user) {
         if (userRepository.existsByUsername(user.getUsername())) {
-            throw new UserAlreadyExistedException(
+            throw new UserAlreadyExistsException(
                     "User with username " + user.getUsername() + " already exists!");
         }
         return userRepository.save(user);
@@ -43,17 +42,12 @@ public class UserService {
     @Transactional
     public User update(Long id, UserUpdateRequest request) {
         User user = getById(id);
-        if (!Objects.equals(request.username(), user.getUsername())
+        if (!request.username().equals(user.getUsername())
                 && userRepository.existsByUsername(request.username())) {
-            throw new UserAlreadyExistedException("Username " + request.username() + " is already taken");
+            throw new UserAlreadyExistsException("Username " + request.username() + " is already taken");
         }
-        if (request.username() != null) {
-            user.setUsername(request.username());
-        }
-
-        if (request.password() != null) {
-            user.setPassword(request.password());
-        }
+        user.setUsername(request.username());
+        user.setPassword(request.password());
         return user;
     }
 }
