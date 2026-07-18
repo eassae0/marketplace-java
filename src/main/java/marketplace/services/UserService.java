@@ -17,17 +17,16 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public User register(User user) {
+    public User create(User user) {
         if (userRepository.existsByUsername(user.getUsername())) {
-            throw new UserAlreadyExistsException(
-                    "User with username " + user.getUsername() + " already exists!");
+            throw new UserAlreadyExistsException(user.getUsername());
         }
         return userRepository.save(user);
     }
 
     public User getById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User with ID: " + id + " not found!"));
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     public List<User> getAll() {
@@ -44,7 +43,7 @@ public class UserService {
         User user = getById(id);
         if (!request.username().equals(user.getUsername())
                 && userRepository.existsByUsername(request.username())) {
-            throw new UserAlreadyExistsException("Username " + request.username() + " is already taken");
+            throw new UserAlreadyExistsException(request.username());
         }
         user.setUsername(request.username());
         user.setPassword(request.password());

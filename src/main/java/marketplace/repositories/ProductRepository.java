@@ -14,7 +14,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Product p where p.id = :id")
-    public Optional<Product> findByIdForUpdate(Long id);
+    Optional<Product> findByIdForUpdate(Long id);
+
+    boolean existsByTitle(String title);
 }
 
 

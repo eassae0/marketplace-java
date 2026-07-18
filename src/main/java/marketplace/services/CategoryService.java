@@ -20,14 +20,14 @@ public class CategoryService {
     @Transactional
     public Category add(Category category) {
         if (categoryRepository.existsByName(category.getName())) {
-            throw new CategoryAlreadyExistsException("Category: " + category.getName() + " already exists!");
+            throw new CategoryAlreadyExistsException(category.getName());
         }
         return categoryRepository.save(category);
     }
 
     public Category getById(Long id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new CategoryNotFoundException("Category: " + id + " not found!"));
+                .orElseThrow(() -> new CategoryNotFoundException(id));
     }
 
     public List<Category> getAll() {
@@ -44,7 +44,7 @@ public class CategoryService {
         Category category = getById(id);
         if (!Objects.equals(category.getName(), request.name())
                 && categoryRepository.existsByName(request.name())) {
-            throw new CategoryAlreadyExistsException("Category: " + request.name() + " already exists");
+            throw new CategoryAlreadyExistsException(request.name());
         }
         category.setName(request.name());
         return category;

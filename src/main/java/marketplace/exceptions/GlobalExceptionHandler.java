@@ -16,17 +16,18 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleUserAlreadyExist(UserAlreadyExistsException e) {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception e) {
 
         ErrorResponse response = new ErrorResponse(
                 LocalDateTime.now(),
-                HttpStatus.CONFLICT.value(),
-                e.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal server error",
                 null
         );
+
         return ResponseEntity
-                .status(HttpStatus.CONFLICT)
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(response);
     }
 
@@ -46,12 +47,11 @@ public class GlobalExceptionHandler {
                 "Validation failed",
                 mapErrors
         );
-
         return ResponseEntity.badRequest().body(response);
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException e) {
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException e) {
         ErrorResponse response = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
@@ -61,19 +61,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    @ExceptionHandler(CategoryNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleCategoryNotFound(CategoryNotFoundException e) {
-        ErrorResponse response = new ErrorResponse(
-                LocalDateTime.now(),
-                HttpStatus.NOT_FOUND.value(),
-                e.getMessage(),
-                null
-        );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-    }
-
-    @ExceptionHandler(CategoryAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleCategoryAlreadyExist(CategoryAlreadyExistsException e) {
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleAlreadyExists(AlreadyExistsException e) {
 
         ErrorResponse response = new ErrorResponse(
                 LocalDateTime.now(),
@@ -85,6 +74,4 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(response);
     }
-
-
 }

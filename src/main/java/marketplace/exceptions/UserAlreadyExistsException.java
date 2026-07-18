@@ -1,8 +1,8 @@
 package marketplace.exceptions;
 
-public class UserAlreadyExistsException extends RuntimeException {
+public class UserAlreadyExistsException extends AlreadyExistsException {
 
-    public UserAlreadyExistsException(String message) {
-        super(message);
+    public UserAlreadyExistsException(String username) {
+        super("User with username = " + username + " not found");
     }
 }

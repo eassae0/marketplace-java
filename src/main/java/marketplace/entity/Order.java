@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import marketplace.entity.enums.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,12 +26,15 @@ public class Order {
     @JoinColumn(name = "user_id")
     User user;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     List<OrderProduct> items = new ArrayList<>();
 
     private BigDecimal totalPrice;
 
     private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
     
 }

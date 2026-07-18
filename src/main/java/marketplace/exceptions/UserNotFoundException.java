@@ -1,7 +1,7 @@
 package marketplace.exceptions;
 
-public class UserNotFoundException extends RuntimeException {
-    public UserNotFoundException(String message) {
-        super(message);
+public class UserNotFoundException extends NotFoundException {
+    public UserNotFoundException(Long id) {
+        super("User with id = " + id + " not found");
     }
 }
