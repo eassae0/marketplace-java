@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import marketplace.dto.request.OrderCreateRequest;
 import marketplace.dto.request.OrderProductRequest;
+import marketplace.dto.request.OrderUpdateRequest;
 import marketplace.entity.Order;
 import marketplace.entity.OrderProduct;
 import marketplace.entity.Product;
@@ -81,11 +82,6 @@ public class OrderService {
 //        Order order = getById(id);
 //        order.setItems(request.products());
 //
-//        product.setTitle(request.title());
-//        product.setPrice(request.price());
-//        product.setQuantity(request.quantity());
-//        product.setCategory(category);
-//        return product;
 //    }
 
 }
