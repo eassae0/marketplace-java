@@ -1,10 +1,9 @@
 package marketplace.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import marketplace.entity.enums.OrderStatusType;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,7 +12,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "orders")
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Order {
