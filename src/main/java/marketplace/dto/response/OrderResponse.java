@@ -1,6 +1,6 @@
 package marketplace.dto.response;
 
-import marketplace.entity.enums.OrderStatus;
+import marketplace.entity.enums.OrderStatusType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,6 +13,6 @@ public record OrderResponse(
         LocalDateTime createdAt,
         List<OrderProductResponse> items,
         BigDecimal totalPrice,
-        OrderStatus status
+        OrderStatusType status
 ) {
 }

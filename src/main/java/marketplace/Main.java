@@ -1,7 +1,5 @@
 package marketplace;
 
-import marketplace.entity.User;
-import marketplace.repositories.UserRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;

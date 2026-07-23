@@ -29,7 +29,7 @@ public class UserService {
         User user = new User();
         user.setUsername(request.username());
         user.setPassword(passwordEncoder.encode(request.password()));
-        user.setRole(Role.USER);
+        user.setRole(Role.ADMIN);
         return userRepository.save(user);
     }
 
@@ -55,7 +55,7 @@ public class UserService {
             throw new UserAlreadyExistsException(request.username());
         }
         user.setUsername(request.username());
-        user.setPassword(request.password());
+        user.setPassword(passwordEncoder.encode(request.password()));
         return user;
     }
 }

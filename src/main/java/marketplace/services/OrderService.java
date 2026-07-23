@@ -4,12 +4,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import marketplace.dto.request.OrderCreateRequest;
 import marketplace.dto.request.OrderProductRequest;
-import marketplace.dto.request.OrderUpdateRequest;
 import marketplace.entity.Order;
 import marketplace.entity.OrderProduct;
 import marketplace.entity.Product;
 import marketplace.entity.User;
-import marketplace.entity.enums.OrderStatus;
+import marketplace.entity.enums.OrderStatusType;
 import marketplace.exceptions.InsufficientProductQuantityException;
 import marketplace.exceptions.OrderNotFoundException;
 import marketplace.exceptions.ProductNotFoundException;
@@ -34,7 +33,7 @@ public class OrderService {
         User user = userService.getById(request.userId());
         order.setUser(user);
         order.setCreatedAt(LocalDateTime.now());
-        order.setStatus(OrderStatus.CREATED);
+        order.setStatus(OrderStatusType.CREATED);
 
         BigDecimal totalPrice = BigDecimal.ZERO;
 

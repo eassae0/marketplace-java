@@ -1,6 +1,6 @@
 package marketplace.entity.enums;
 
-public enum OrderStatus {
+public enum OrderStatusType {
     CREATED,
     PAID,
     COMPLETED,
