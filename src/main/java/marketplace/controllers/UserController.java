@@ -10,6 +10,7 @@ import marketplace.mapper.UserMapper;
 import marketplace.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,12 +29,14 @@ public class UserController {
         return new ResponseEntity<>(UserMapper.toResponse(savedUser), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getById(@PathVariable Long id) {
         User user = userService.getById(id);
         return ResponseEntity.ok(UserMapper.toResponse(user));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAll() {
         List<User> users = userService.getAll();
@@ -45,15 +48,17 @@ public class UserController {
         return ResponseEntity.ok(responseUsers);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         userService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> update(@PathVariable Long id,
-                                       @Valid @RequestBody UserUpdateRequest request) {
+                                               @Valid @RequestBody UserUpdateRequest request) {
         User user = userService.update(id, request);
         return ResponseEntity.ok(UserMapper.toResponse(user));
     }

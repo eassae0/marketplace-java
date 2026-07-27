@@ -9,11 +9,12 @@ import marketplace.entity.OrderProduct;
 import marketplace.entity.Product;
 import marketplace.entity.User;
 import marketplace.entity.enums.OrderStatusType;
-import marketplace.exceptions.InsufficientProductQuantityException;
-import marketplace.exceptions.OrderNotFoundException;
-import marketplace.exceptions.ProductNotFoundException;
+import marketplace.exceptions.*;
 import marketplace.repositories.OrderRepository;
 import marketplace.repositories.ProductRepository;
+import marketplace.repositories.UserRepository;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,11 +27,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @Transactional
-    public Order create(OrderCreateRequest request) {
+    public Order create(OrderCreateRequest request, UserDetails userDetails) {
         Order order = new Order();
-        User user = userService.getById(request.userId());
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
         order.setUser(user);
         order.setCreatedAt(LocalDateTime.now());
         order.setStatus(OrderStatusType.CREATED);
@@ -66,10 +69,42 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
+    public List<Order> getAllByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
+        return orderRepository.findAllByUser(user);
+    }
+
+
     public Order getById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
     }
+
+    public Order getById(Long id, UserDetails userDetails) {
+        Order order = getById(id);
+
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        boolean isOwner = userDetails.getUsername().equals(order.getUser().getUsername());
+
+        if (!isAdmin && !isOwner) throw new AccessDeniedException("You do not have access to this order");
+
+        return order;
+    }
+
+    @Transactional
+    public Order cancel(Long id, UserDetails userDetails) {
+        Order order = getById(id, userDetails);
+        if (order.getStatus() != OrderStatusType.CREATED
+                && order.getStatus() != OrderStatusType.PAID) {
+            throw new IllegalOrderStateException(order.getStatus());
+        }
+        order.setStatus(OrderStatusType.CANCELLED);
+        return order;
+    }
+
 
     @Transactional
     public void delete(Long id) {
