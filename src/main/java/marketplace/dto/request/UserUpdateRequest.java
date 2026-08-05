@@ -9,7 +9,7 @@ public record UserUpdateRequest(
         String username,
 
         @NotBlank
-        @Size(min = 6, max = 30)
+        @Size(min = 8, max = 30)
         String password
 ) {
 }

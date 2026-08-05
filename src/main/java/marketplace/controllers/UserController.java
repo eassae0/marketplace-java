@@ -29,6 +29,9 @@ public class UserController {
         return new ResponseEntity<>(UserMapper.toResponse(savedUser), HttpStatus.CREATED);
     }
 
+    /*
+    * TODO: add endpoint GET /me */
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getById(@PathVariable Long id) {

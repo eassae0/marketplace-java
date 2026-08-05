@@ -102,6 +102,11 @@ public class OrderService {
             throw new IllegalOrderStateException(order.getStatus());
         }
         order.setStatus(OrderStatusType.CANCELLED);
+        for (OrderProduct orderProduct : order.getItems()) {
+            Product product = productRepository.findByIdForUpdate(orderProduct.getProduct().getId())
+                    .orElseThrow(() -> new ProductNotFoundException(orderProduct.getProduct().getId()));
+            product.setQuantity(product.getQuantity() + orderProduct.getQuantity());
+        }
         return order;
     }
 

@@ -83,7 +83,6 @@ public class OrderController {
     public ResponseEntity<OrderResponse> cancel(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
-        System.out.println("Cancel endpoint");
         Order order = orderService.cancel(id, userDetails);
         return ResponseEntity.ok(OrderMapper.toResponse(order));
     }
